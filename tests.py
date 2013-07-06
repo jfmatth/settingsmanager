@@ -3,8 +3,16 @@ import unittest, os
 import settings
 
 class SimpleSettingsTest(unittest.TestCase):
-    str1 = 'this is a test'
-    str2 = 'this is the second test in the dictionary'
+    '''
+    Test the settings module.
+    
+    Store a pair of keys 
+    '''
+    k1 = "Key1"
+    k2 = "Key2"
+    
+    v1 = 'Value 1'
+    v2 = 'Value 2'
         
     def setUp(self):
         self.c = settings.SettingsDict()
@@ -12,13 +20,20 @@ class SimpleSettingsTest(unittest.TestCase):
     def tearDown(self):
         del(self.c)
         
-    def testAdd(self):
-        self.c['str1'] = self.str1
-        self.c['str2'] = self.str2
+    def test_1Add(self):
+        self.c[self.k1] = self.v1
+        self.assertIn(self.k1, self.c)
         
-    def testRecall(self):
-        self.assertEqual(self.c['str1'], self.str1)
-        self.assertEqual(self.c['str2'], self.str2)
+        self.c[self.k2] = self.v2
+        self.assertIn(self.k2, self.c)
+        
+    def test_2Recall(self):
+        self.assertEqual(self.c[self.k1], self.v1)
+        self.assertEqual(self.c[self.k2], self.v2)
+        
+    def test_3Overwrite(self):
+        self.c[self.k1] = self.v1
+        self.assertIn(self.k1, self.c)
 
 if __name__ == '__main__':
     unittest.main()
