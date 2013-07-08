@@ -4,10 +4,10 @@ dbmanager
 Holds all the peewee DB definitions
 
 '''
-import peewee, config, os 
+import peewee, configutil, os 
 
 DBNAME = "database.db"
-DBPATH = config.module_path() 
+DBPATH = configutil.module_path() 
 
 db = peewee.SqliteDatabase(None)
 class basetable(peewee.Model):
