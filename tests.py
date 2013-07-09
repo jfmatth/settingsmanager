@@ -10,7 +10,6 @@ class SimpleSettingsTest(unittest.TestCase):
     
     Store a pair of keys 
     '''
-
     
     k1 = "Key1"
     k2 = "Key2"
@@ -18,13 +17,17 @@ class SimpleSettingsTest(unittest.TestCase):
     v1 = 'Value 1'
     v2 = 'Value 2'
         
+    c = None
+        
     def setUp(self):
         self.c = settings.SettingsDict(dbname=TESTDB)
-        
+         
     def tearDown(self):
         del(self.c)
 
     def test_1Add(self):
+        self.c = settings.SettingsDict(dbname=TESTDB)
+        
         self.c[self.k1] = self.v1
         self.assertIn(self.k1, self.c)
         

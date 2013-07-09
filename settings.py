@@ -49,7 +49,7 @@ class SettingsDict(dict):
 
         dict.__setitem__(self, k, v)
 
-    def sync(self, fail_silently = True):
+    def syncweb(self, fail_silently = True):
         '''
         Sync all our settings with the main RPC server.
         Requires that there are certain settings in the DB / dict to find the server.
@@ -66,4 +66,4 @@ class SettingsDict(dict):
             self.update( rpc.settings() )
         else:
             if not fail_silently:
-                raise SyncWebException("%s not defined in SettingsDict" % self.RPCSERVERKEY)
+                raise SyncWebException("%s key not defined in SettingsDict" % self.RPCSERVER)
