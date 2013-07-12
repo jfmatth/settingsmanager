@@ -5,15 +5,16 @@ import dbmanager
 
 import xmlrpclib
 
+IDVERSION = 1.00
+
 class SyncWebException(Exception):
     pass 
 
 class SettingsDict(dict):
     '''
-    a subclassed dict, which loads and saves it's values to a peewee database (sqllite) via the 
+    A subclassed dict, which loads and saves it's values to a peewee database (sqllite) via the 
     dbmanager module.
     
-    Eventually this will do a read-only sync with the RPC web interface.
     '''
     RPCPATH    = "/rpc/"           # URL path to the RPCXML functions.
     RPCSERVER  = 'rpcserver'       # key value required for syncweb to work, address of our server.
@@ -49,6 +50,10 @@ class SettingsDict(dict):
 
         dict.__setitem__(self, k, v)
 
+    def set_server(self, serverIP):
+        if not serverIP == None:
+            self[self.RPCSERVER] = serverIP
+
     def syncweb(self, fail_silently = True):
         '''
         Sync all our settings with the main RPC server.
@@ -63,7 +68,41 @@ class SettingsDict(dict):
             rpc = xmlrpclib.ServerProxy( svrpath )
             
             # grab all the settings from the rpc server.
-            self.update( rpc.settings() )
+            self.update( rpc.settings(self.get_identity() ) )
         else:
             if not fail_silently:
                 raise SyncWebException("%s key not defined in SettingsDict" % self.RPCSERVER)
+
+    def get_identity(self):
+        '''
+        Returns a dictionary with the parameters that define this system.
+        '''
+        idparams = {}
+        idparams['guid']      = self.get('guid')
+        idparams['ipaddr']    = self.get('ipaddr')
+        idparams['hostname']  = self.get('hostname')
+        idparams['macaddr']   = self.get('macaddr')
+        idparams['idversion'] = IDVERSION 
+        
+        return idparams
+
+    def set_identity(self, idparams):
+        '''
+        Pretty much the opposite of get_identity, but this provides a method to set the personality of this
+        system.
+        
+        Example of usage for first time:
+        
+        x = settings.get_identity()  # this will be a blank dictionary with only the version set.
+        x['guid']     = <some value for uniquely identifying a system>
+        x['ipaddr']   = socket.gethostbyname_ex(socket.gethostname() )[2][0]
+        x['hostname'] = socket.gethostbyname_ex(socket.gethostname() )[0]
+        x['macaddr']  = uuid.getnode()
+        settings.set_identity(x)
+        
+        '''
+        if type(idparams) == dict:
+            for k,v in idparams.iteritems():
+                if not v == None:
+                    self[k] = v
+
