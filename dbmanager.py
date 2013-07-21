@@ -22,9 +22,7 @@ class setting(basetable):
     setting is the table for key / value pairs, used by the settings.py module.
     '''
     key = peewee.CharField(unique=True)     # unique creates a unique index.
-    value = peewee.TextField()
-
-
+    value = peewee.TextField(null=True)
     
 def init(dbname=DBNAME, path=None):
     '''
