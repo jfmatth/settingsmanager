@@ -1,9 +1,6 @@
-'''
-settings.py - Holds all settings for this setup (blah).
-'''
-import dbmanager
-
 import xmlrpclib
+
+import dbmanager
 
 IDVERSION = 1.00
 
@@ -12,14 +9,16 @@ class SyncWebException(Exception):
 
 class SettingsDict(dict):
     '''
-    A subclassed dict, which loads and saves it's values to a peewee database (sqllite) via the 
-    dbmanager module.
-    
+    A dict class that saves it's values to a local DB and allows a read-only sync from a remote RPC
+    server.
+
+    uses the dbmanager (peewee) library to sync with a database.  dbmanager is the main DB interface
+    for all DB related functions in this environment.
     '''
     RPCPATH    = "/rpc/"           # URL path to the RPCXML functions.
     RPCSERVER  = 'rpcserver'       # key value required for syncweb to work, address of our server.
 
-    sTable = dbmanager.setting
+    sTable = dbmanager.setting     # the DB table holding our values.
 
     def __init__(self, *args, **kwargs):
         '''
@@ -35,6 +34,9 @@ class SettingsDict(dict):
         # load all the existing data from the settings table.
         for s in self.sTable.select():
             dict.__setitem__(self, s.key,s.value)
+
+        # if we can, we should sync with the web server.
+        self.sync_remote()
 
         dict.__init__(self, *args, **kwargs)
         
@@ -54,7 +56,6 @@ class SettingsDict(dict):
         dict.__setitem__(self, k, v)
 
     def update(self, *args, **kwargs):
-        print 'update', args, kwargs
         for k, v in dict(*args, **kwargs).iteritems():
             self[k] = v
 
@@ -62,7 +63,7 @@ class SettingsDict(dict):
         if not serverIP == None:
             self[self.RPCSERVER] = serverIP
 
-    def update_remote(self, fail_silently = True):
+    def sync_remote(self, fail_silently = True):
         '''
         Sync all our settings with the main RPC server.
         Requires that there are certain settings in the DB / dict to find the server.
@@ -75,11 +76,20 @@ class SettingsDict(dict):
             svrpath = self[self.RPCSERVER] + self.RPCPATH
             rpc = xmlrpclib.ServerProxy(svrpath, allow_none=True)
 
-            # troubleshooting
-            self.update( rpc.settings(self.get_identity() ))
+            # we ignore any RPC errors unless we don't want to
+            try:
+                self.update( rpc.settings(self.get_identity()) )
+                return "Synchronized"
+            except:
+                if fail_silently:
+                    return "Offline"
+                else:
+                    raise
         else:
             if not fail_silently:
                 raise SyncWebException("%s key not defined in SettingsDict" % self.RPCSERVER)
+            else:
+                return "No %s key defined" % self.RPCSERVER
 
     def get_identity(self):
         '''
@@ -107,10 +117,8 @@ class SettingsDict(dict):
         x['hostname'] = socket.gethostbyname_ex(socket.gethostname() )[0]
         x['macaddr']  = uuid.getnode()
         settings.set_identity(x)
-        
         '''
         if type(idparams) == dict:
             for k,v in idparams.iteritems():
                 if not v==None:                 # we don't save None's 
                     self[k] = v
-

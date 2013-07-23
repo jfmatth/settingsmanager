@@ -28,19 +28,20 @@ def main(remoteID=None):
 
     # save our identity    
     ident = s.get_identity()
-    print "identity currently"
-    print s
     
     ident['ipaddr']   = socket.gethostbyname_ex(socket.gethostname() )[2][0]
     ident['hostname'] = socket.gethostbyname_ex(socket.gethostname() )[0]
     ident['macaddr']  = hex(uuid.getnode())
     s.set_identity(ident)
-    print s
     
-    s.update_remote(fail_silently=False)
-    
-    print "Registered"
-    print s
+    try:
+        s.sync_remote(fail_silently=False)
+        print "Registered"
+        print s
+    except socket.error:
+        print "Server offline"
+    else:
+        raise
     
 if __name__ == "__main__":
     if len(sys.argv) == 2:
