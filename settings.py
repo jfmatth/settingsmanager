@@ -1,6 +1,9 @@
 import xmlrpclib
+import logging
 
 import dbmanager
+
+logger = logging.getLogger(__name__)
 
 IDVERSION = 1.00
 
@@ -70,20 +73,24 @@ class SettingsDict(dict):
         
         fail_silently - requires that the value for RPCSERVER key be present in the dictionary to test with.
         '''
+        logger.debug("sync_remote")
         if self.has_key(self.RPCSERVER):
             # try to sync with the main web server.
             # create the full URL for our RPC server
+            logger.debug("connecting to RPC server %s%s" % (self[self.RPCSERVER],self.RPCPATH) )
             svrpath = self[self.RPCSERVER] + self.RPCPATH
             rpc = xmlrpclib.ServerProxy(svrpath, allow_none=True)
 
             # we ignore any RPC errors unless we don't want to
             try:
                 self.update( rpc.settings(self.get_identity()) )
-                return "Synchronized"
+                logger.info("Synchronized")
             except:
+                logger.warning("sync failed")
                 if fail_silently:
-                    return "Offline"
+                    logger.info("Offline")
                 else:
+                    logger.critical("Sync failed, raising exception")
                     raise
         else:
             if not fail_silently:
@@ -95,6 +102,8 @@ class SettingsDict(dict):
         '''
         Returns a dictionary with the parameters that define this system.
         '''
+        logger.debug("get_identity")
+        
         idparams = {}
         idparams['guid']      = self.get('guid')
         idparams['ipaddr']    = self.get('ipaddr')
@@ -118,6 +127,8 @@ class SettingsDict(dict):
         x['macaddr']  = uuid.getnode()
         settings.set_identity(x)
         '''
+        logger.debug("set_identity")
+        
         if type(idparams) == dict:
             for k,v in idparams.iteritems():
                 if not v==None:                 # we don't save None's 
