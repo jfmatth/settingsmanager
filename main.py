@@ -9,6 +9,7 @@ import logging.config
 from settings import SettingsDict
 import dbmanager
 import logconfig       ## all our log settings are here for now.
+
 logger = logging.getLogger("main")
 
 # define a procedure that gets us out of this.

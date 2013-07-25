@@ -35,8 +35,9 @@ LOG_SETTINGS = {
             'handlers': ['file','console'],
             },
         'main': {
-            'level':'INFO',
+            'level':'DEBUG',
             'handlers': ['file','console'],
+            'propogate': True
             },
 
     }
