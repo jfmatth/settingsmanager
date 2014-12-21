@@ -1,32 +1,28 @@
 import logging
-from settingsdb import Setting, db
+from db import Setting, Init
 
 logger = logging.getLogger(__name__)
 
 class SettingsDict(dict):
-    def __init__(self, *args, **kwargs):
-        db.connect()
-        self.table = Setting()
+    def __init__(self, name="settings.db"):
+            
+        Init(name)
         
-        for s in self.table.All():
+        for s in Setting.select():
             dict.__setitem__(self, s.key,s.value)
 
-        dict.__init__(self, *args, **kwargs)
+        dict.__init__(self)
 
-    def __del__(self):
-        db.close()
-        super(SettingsDict, self).__del__()
-        
     def __setitem__(self, k, v):
         '''
         provide logic to see if the DB needs a replace or new item (built into dict already)
         '''
         if self.has_key(k):
             # get the object from the DB, and update it.
-            r = self.table.get(key=k)
+            r = Setting.get(key=k)
             r.value = v 
         else:
-            r = self.table(key=k, value=v) 
+            r = Setting(key=k, value=v) 
 
         r.save()
 
