@@ -5,8 +5,8 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-class SettingsDict(dict):
-    def __init__(self, name="settings.db"):
+class DBDict(dict):
+    def __init__(self, name="dbdict.db"):
             
         logger.debug("Calling dbinit")
         dbInit(name)
@@ -39,7 +39,7 @@ class SettingsDict(dict):
             self[k] = v
 
 
-class RemoteDict(SettingsDict):
+class RemoteDict(DBDict):
     # this is mainly a behavior class for subclasses that want to override the behavior methods.
 
     def __init__(self, *args, **kwargs):
@@ -83,7 +83,6 @@ class RemoteUrlDict(RemoteDict):
 
     def _remoteSyncUp(self):
         # push the data to the remote
-        print "sending my data to server %s" % (self.get("remoteid") )
         try:        
             headers = {'Content-Type': 'application/json'}
             url = self.get("remoteid")
@@ -95,7 +94,6 @@ class RemoteUrlDict(RemoteDict):
         
     def _remoteSyncDown(self):
         # pull it all down from the server
-        print "Syncing down data"
         try:
             url = self.get("remoteid")
             r = requests.get(url)
