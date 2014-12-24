@@ -14,7 +14,7 @@ class Setting(basetable):
     def All(self):
         return self.select()
 
-def Init(name="database.db"):
+def dbInit(name="database.db"):
     db.init(name)
     db.connect()
     db.create_tables([Setting], safe=True)
@@ -28,6 +28,6 @@ if __name__== "__main__":
     if args.init:
         print("Initalizing Database")
         if args.name:
-            Init(args.name)
+            dbInit(args.name)
         else:    
-            Init()
+            dbInit()

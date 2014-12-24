@@ -2,9 +2,9 @@ import unittest
 import os
 
 from settingsdict import SettingsDict
-from db import Init
+from db import dbInit as Init
 
-TESTFILE = ":memory"
+TESTFILE = "tests.db"
 
 class SimpleSettings_Basics(unittest.TestCase):
     '''
@@ -18,7 +18,7 @@ class SimpleSettings_Basics(unittest.TestCase):
     v1 = 'Value 1'
     v2 = 'Value 2'
 
-    def setUp(self):
+    def test_0setUp(self):
         try:
             os.remove(TESTFILE)
         except:
